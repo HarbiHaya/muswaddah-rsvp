@@ -816,21 +816,17 @@ async function doSubmit() {
   btn.disabled = true;
   btn.querySelector('span').textContent = '...';
 
-  const body = new FormData();
-  body.append(CONFIG.ENTRY_NAME,  fd['f-name']  || '');
-  body.append(CONFIG.ENTRY_PHONE, fd['f-phone'] || '');
-
   try {
-    await fetch(
-      'https://docs.google.com/forms/d/e/' + CONFIG.FORM_ID + '/formResponse',
-      { method: 'POST', body: body, mode: 'no-cors' }
-    );
-  } catch (_) {
-    // no-cors always throws — submission still lands in Sheets
-  }
+    const res  = await fetch(CONFIG.APPS_SCRIPT + '?t=' + Date.now(), {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'name=' + encodeURIComponent(fd['f-name'] || '') +
+            '&phone=' + encodeURIComponent(fd['f-phone'] || '')
+    });
+  } catch (_) {}
 
-  // wait a moment then re-fetch live count
-  await new Promise(r => setTimeout(r, 1200));
+  await new Promise(r => setTimeout(r, 1500));
   await fetchCount();
 
   const nameEl = document.getElementById('conf-name');
