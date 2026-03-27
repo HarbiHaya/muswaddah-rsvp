@@ -733,7 +733,7 @@ let fd = {};
 // Fetch live count from Sheets via Apps Script
 async function fetchCount() {
   try {
-    const res  = await fetch(CONFIG.APPS_SCRIPT);
+    const res = await fetch(CONFIG.APPS_SCRIPT + '?t=' + Date.now());
     const data = await res.json();
     registered = Math.max(0, Number(data.count) || 0);
   } catch (_) {
