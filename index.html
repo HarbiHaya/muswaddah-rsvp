@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title> مســـــــودّة — تسجيل الحضور</title>
+<title>مســـــــودّة — تسجيل الحضور</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -16,11 +16,12 @@
   --navy-2:   #16213E;
   --navy-3:   #0F3460;
   --off:      #F8F6F2;
-  --off-dim:  rgba(248,246,242,0.55);
-  --off-soft: rgba(248,246,242,0.25);
+  --off-dim:  rgba(248,246,242,0.72);
+  --off-soft: rgba(248,246,242,0.32);
   --off-faint:rgba(248,246,242,0.08);
   --teal:     #2EC4B6;
   --orange:   #FF8C42;
+  --board:    #160f36;
 }
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
@@ -28,7 +29,7 @@ html { font-size:16px; }
 
 body {
   min-height: 100vh;
-  background: var(--navy);
+  background: var(--board);
   font-family: 'IBM Plex Sans Arabic', sans-serif;
   display: flex;
   align-items: flex-start;
@@ -39,134 +40,79 @@ body {
   overflow-x: hidden;
 }
 
-/* grid overlay */
+/* dotted board */
 body::before {
   content: '';
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 40px 40px;
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.10) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
+  opacity: 0.22;
   pointer-events: none;
   z-index: 0;
 }
 
-/* noise */
+/* soft overlay */
 body::after {
   content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 256px;
-  opacity: 0.025;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* floating bg blobs */
-.blob {
   position: fixed;
-  border-radius: 50%;
-  opacity: 0.06;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.03), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255,255,255,0.025), transparent 24%);
   pointer-events: none;
   z-index: 0;
-  animation: floatBlob 10s ease-in-out infinite;
-}
-.blob-1 { width:380px;height:380px;background:var(--coral);  top:-80px;   right:-60px;  animation-delay:0s; }
-.blob-2 { width:280px;height:280px;background:var(--mint);   bottom:200px;left:-80px;   animation-delay:-4s; }
-.blob-3 { width:220px;height:220px;background:var(--lavender);top:40%;    right:5%;     animation-delay:-7s; }
-@keyframes floatBlob {
-  0%,100%{transform:translate(0,0);}
-  50%{transform:translate(20px,-30px);}
 }
 
 .wrap {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
 }
 
 /* ── HEADER ── */
 .header {
-  text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 26px;
   animation: fadeUp 0.7s ease-out both;
 }
 
-.club-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: var(--off-faint);
-  border-radius: 100px;
-  padding: 8px 20px;
-  margin-bottom: 28px;
-}
-.club-tag-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--mint);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }
-.club-tag-text {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--off-dim);
-  letter-spacing: 0.06em;
-}
-
-.title-wrap {
-  position: relative;
-  display: inline-block;
-  margin-bottom: 4px;
-}
-.title-main {
-  font-size: clamp(80px, 22vw, 120px);
-  font-weight: 700;
-  color: var(--off);
-  line-height: 1;
-  text-shadow:
-    3px 3px 0 var(--coral),
-    -2px 5px 0 var(--mint),
-    5px -2px 0 var(--lavender);
-  position: relative;
-  z-index: 2;
-}
-.title-underlines {
+.header-top {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 6px;
-  margin-bottom: 20px;
+  justify-content: flex-start;
+  margin-bottom: 14px;
 }
-.title-underlines span {
-  height: 5px;
-  border-radius: 3px;
-  animation: growW 0.7s ease-out both;
-}
-.title-underlines span:nth-child(1){width:60px;background:var(--coral);  animation-delay:0.4s;}
-.title-underlines span:nth-child(2){width:40px;background:var(--mint);   animation-delay:0.5s;}
-.title-underlines span:nth-child(3){width:80px;background:var(--lavender);animation-delay:0.6s;}
-.title-underlines span:nth-child(4){width:50px;background:var(--gold);   animation-delay:0.7s;}
-@keyframes growW { from{transform:scaleX(0);} to{transform:scaleX(1);} }
 
-.title-sub {
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--off-dim);
-  letter-spacing: 0.06em;
-  line-height: 1.8;
+.header-club-logo {
+  width: min(235px, 58%);
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.header-main {
+  text-align: center;
+}
+
+.header-main-logo {
+  width: 100%;
+  max-width: 470px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
 }
 
 /* ── CARD ── */
 .card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.09);
-  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.11);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   animation: fadeUp 0.7s ease-out 0.1s both;
   overflow: hidden;
+  border-radius: 22px;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.28);
 }
 
 /* ── SEATS BAR ── */
@@ -312,6 +258,7 @@ body::after {
   padding: 12px 14px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
 }
 .info-k {
   font-size: 9.5px;
@@ -340,6 +287,7 @@ body::after {
   color: var(--off-dim);
   line-height: 1.9;
   margin-top: 12px;
+  border-radius: 14px;
 }
 
 /* ── DIVIDER ── */
@@ -371,6 +319,7 @@ body::after {
   position: relative;
   overflow: hidden;
   transition: transform 0.15s, opacity 0.2s;
+  border-radius: 14px;
 }
 .btn-p::after {
   content: '';
@@ -393,9 +342,10 @@ body::after {
   font-size: 12px; font-weight: 400;
   color: var(--off-dim);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  border-radius: 14px;
 }
-.btn-g:hover { border-color: var(--mint); color: var(--mint); }
+.btn-g:hover { border-color: var(--mint); color: var(--mint); background: rgba(255,255,255,0.02); }
 
 /* ── REVIEW ── */
 .review-body { padding: 20px 28px 0; }
@@ -479,7 +429,12 @@ body::after {
   color: var(--off);
   margin-bottom: 10px;
 }
-.full-body p { font-size: 13px; font-weight: 300; color: var(--off-dim); line-height: 1.9; }
+.full-body p {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--off-dim);
+  line-height: 1.9;
+}
 
 /* ── FOOTER ── */
 .card-footer {
@@ -510,35 +465,46 @@ body::after {
   background: linear-gradient(90deg, var(--coral), var(--gold), var(--mint), var(--lavender));
   animation: growW 1s ease-out 0.2s both;
 }
+@keyframes growW { from{transform:scaleX(0);} to{transform:scaleX(1);} }
+
+/* responsive */
+@media (max-width: 560px) {
+  body { padding: 34px 14px 54px; }
+  .wrap { max-width: 100%; }
+  .header-top { margin-bottom: 10px; }
+  .header-club-logo { width: min(200px, 62%); }
+  .header-main-logo { max-width: 100%; }
+  .card { border-radius: 18px; }
+  .seats,
+  .form-body,
+  .review-body,
+  .card-footer,
+  .btn-row { padding-left: 20px; padding-right: 20px; }
+}
+
+@media (max-width: 420px) {
+  .info-card { min-width: 100%; }
+  .card-footer {
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
+}
 </style>
 </head>
 <body>
-
-<div class="blob blob-1"></div>
-<div class="blob blob-2"></div>
-<div class="blob blob-3"></div>
 
 <div class="wrap">
 
   <!-- HEADER -->
   <div class="header">
-    <div style="display:flex;justify-content:center;">
-      <div class="club-tag">
-        <div class="club-tag-dot"></div>
-        <span class="club-tag-text">نادي الذكاء الاصطناعي والعلوم التقنية · FCITR</span>
-      </div>
+    <div class="header-top">
+      <img src="club-logo.png" alt="Club Logo" class="header-club-logo">
     </div>
 
-    <div class="title-wrap">
-      <div class="title-main">مســـــــودّة</div>
+    <div class="header-main">
+      <img src="muswaddah-logo.png" alt="مسودة" class="header-main-logo">
     </div>
-    <div class="title-underlines">
-      <span></span><span></span><span></span><span></span>
-    </div>
-    <p class="title-sub">
-      جلسات نقاش النادي الأسبوعية<br>
-      <span style="color:var(--off-soft);font-size:11px;">جلسة عملية تبدأ بالفهم، وتنتهي بخطوات قابلة للتطبيق</span>
-    </p>
   </div>
 
   <!-- CARD -->
@@ -717,7 +683,9 @@ async function fetchCount() {
     const res  = await fetch(CONFIG.APPS_SCRIPT + '?t=' + Date.now());
     const data = await res.json();
     registered = Math.max(0, Number(data.count) || 0);
-  } catch (_) { registered = 0; }
+  } catch (_) {
+    registered = 0;
+  }
   updateSeats();
   if (registered >= CONFIG.MAX_SEATS) showPage(5);
 }
@@ -726,8 +694,14 @@ function updateSeats() {
   const left = CONFIG.MAX_SEATS - registered;
   const el = document.getElementById('seatsNum');
   if (el) el.textContent = Math.max(0, left);
+
   const fill = document.getElementById('trackFill');
-  if (fill) setTimeout(() => { fill.style.width = (registered / CONFIG.MAX_SEATS * 100) + '%'; }, 350);
+  if (fill) {
+    setTimeout(() => {
+      fill.style.width = (registered / CONFIG.MAX_SEATS * 100) + '%';
+    }, 350);
+  }
+
   const pips = document.getElementById('pips');
   if (pips) {
     pips.innerHTML = '';
@@ -752,16 +726,26 @@ function goTo(n, inputs) {
     for (const id of inputs) {
       const el = document.getElementById(id);
       if (!el || !el.value.trim()) {
-        if (el) { el.focus(); el.style.borderBottomColor='var(--coral)'; setTimeout(()=>el.style.borderBottomColor='',1500); }
+        if (el) {
+          el.focus();
+          el.style.borderBottomColor = 'var(--coral)';
+          setTimeout(() => el.style.borderBottomColor = '', 1500);
+        }
         return;
       }
     }
-    for (const id of inputs) { const el=document.getElementById(id); if(el) fd[id]=el.value.trim(); }
+
+    for (const id of inputs) {
+      const el = document.getElementById(id);
+      if (el) fd[id] = el.value.trim();
+    }
   }
+
   if (n === 3) {
     document.getElementById('rv-name').textContent  = fd['f-name']  || '—';
     document.getElementById('rv-phone').textContent = fd['f-phone'] || '—';
   }
+
   showPage(n);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -769,6 +753,7 @@ function goTo(n, inputs) {
 async function doSubmit() {
   const btn = document.getElementById('confirmBtn');
   if (!btn) return;
+
   btn.disabled = true;
   btn.querySelector('span').textContent = '...';
 
@@ -788,6 +773,7 @@ async function doSubmit() {
 
   const nameEl = document.getElementById('conf-name');
   if (nameEl) nameEl.textContent = 'تم حجز مقعدك، ' + (fd['f-name'] || '');
+
   showPage(registered <= CONFIG.MAX_SEATS ? 4 : 5);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
