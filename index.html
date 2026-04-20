@@ -833,26 +833,68 @@ body::after {
 
 <script>
 const CONFIG = {
-  MAX_SEATS   : 20,
-  APPS_SCRIPT : 'https://script.google.com/macros/s/AKfycbyrF4cCSFgBFEDJX0Oh1C-IKMAOKLnP3ZB7QcGQuTAgoZdc3kDEbv11TpxuwfRwLJOGpQ/exec'
+  MAX_SEATS: 16,
+  APPS_SCRIPT: 'https://script.google.com/macros/s/AKfycbyrF4cCSFgBFEDJX0Oh1C-IKMAOKLnP3ZB7QcGQuTAgoZdc3kDEbv11TpxuwfRwLJOGpQ/exec',
+  CACHE_KEY: 'muswaddah-seat-count-v1'
 };
 
 let registered = 0;
 let fd = {};
 
-async function fetchCount() {
+function setSubmitButtonLoading(isLoading) {
+  const btn = document.getElementById('confirmBtn');
+  if (!btn) return;
+
+  btn.disabled = isLoading;
+  const span = btn.querySelector('span');
+  if (span) span.textContent = isLoading ? '...' : 'تأكيد الحجز';
+}
+
+function applyCount(count) {
+  registered = Math.max(0, Number(count) || 0);
+
   try {
-    const res = await fetch(CONFIG.APPS_SCRIPT + '?t=' + Date.now());
-    const data = await res.json();
-    registered = Math.max(0, Number(data.count) || 0);
-  } catch (_) {
-    registered = 0;
-  }
+    localStorage.setItem(
+      CONFIG.CACHE_KEY,
+      JSON.stringify({ count: registered, ts: Date.now() })
+    );
+  } catch (_) {}
 
   updateSeats();
 
   if (registered >= CONFIG.MAX_SEATS) {
     showPage(5);
+  }
+}
+
+async function fetchCount() {
+  try {
+    const cached = localStorage.getItem(CONFIG.CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (typeof parsed.count !== 'undefined') {
+        applyCount(parsed.count);
+      }
+    }
+  } catch (_) {}
+
+  try {
+    const res = await fetch(
+      CONFIG.APPS_SCRIPT + '?action=count&t=' + Date.now(),
+      { cache: 'no-store' }
+    );
+
+    if (!res.ok) throw new Error('Count request failed');
+
+    const data = await res.json();
+    if (typeof data.count === 'undefined') throw new Error('Invalid count response');
+
+    applyCount(data.count);
+  } catch (_) {
+    if (Number.isNaN(registered)) {
+      registered = 0;
+      updateSeats();
+    }
   }
 }
 
@@ -896,7 +938,9 @@ function goTo(n, inputs) {
         if (el) {
           el.focus();
           el.style.borderBottomColor = 'var(--coral)';
-          setTimeout(() => el.style.borderBottomColor = '', 1500);
+          setTimeout(() => {
+            el.style.borderBottomColor = '';
+          }, 1500);
         }
         return;
       }
@@ -918,47 +962,66 @@ function goTo(n, inputs) {
 }
 
 async function doSubmit() {
-  const btn = document.getElementById('confirmBtn');
-  if (!btn) return;
-
-  btn.disabled = true;
-  btn.querySelector('span').textContent = '...';
-
-  try {
-    const res = await fetch(CONFIG.APPS_SCRIPT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-      },
-      body: new URLSearchParams({
-        name: fd['f-name'] || '',
-        phone: fd['f-phone'] || ''
-      })
-    });
-
-    const data = await res.json();
-
-    if (data && data.ok) {
-      registered = Math.max(0, Number(data.count) || 0);
-    } else {
-      throw new Error('Submit failed');
-    }
-  } catch (_) {
-    btn.disabled = false;
-    btn.querySelector('span').textContent = 'تأكيد الحجز';
-    alert('صار خطأ أثناء الحجز، حاولي مرة ثانية.');
+  if (registered >= CONFIG.MAX_SEATS) {
+    showPage(5);
     return;
   }
 
-  updateSeats();
+  const name = (fd['f-name'] || '').trim();
+  const phone = (fd['f-phone'] || '').trim();
 
-  const nameEl = document.getElementById('conf-name');
-  if (nameEl) {
-    nameEl.textContent = 'تم حجز مقعدك، ' + (fd['f-name'] || '');
+  if (!name || !phone) {
+    alert('أكملي الاسم ورقم الواتساب أولًا.');
+    return;
   }
 
-  showPage(registered <= CONFIG.MAX_SEATS ? 4 : 5);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setSubmitButtonLoading(true);
+
+  try {
+    const url = new URL(CONFIG.APPS_SCRIPT);
+    url.searchParams.set('action', 'register');
+    url.searchParams.set('name', name);
+    url.searchParams.set('phone', phone);
+    url.searchParams.set('t', Date.now());
+
+    const res = await fetch(url.toString(), {
+      method: 'GET',
+      cache: 'no-store'
+    });
+
+    if (!res.ok) throw new Error('Submit request failed');
+
+    const data = await res.json();
+
+    if (data.full) {
+      if (typeof data.count !== 'undefined') applyCount(data.count);
+      showPage(5);
+      return;
+    }
+
+    if (data.duplicate) {
+      alert('هذا الرقم مسجل مسبقًا.');
+      return;
+    }
+
+    if (!data.ok) {
+      throw new Error(data.error || 'Unknown submit error');
+    }
+
+    applyCount(data.count);
+
+    const nameEl = document.getElementById('conf-name');
+    if (nameEl) {
+      nameEl.textContent = 'تم حجز مقعدك، ' + name;
+    }
+
+    showPage(registered <= CONFIG.MAX_SEATS ? 4 : 5);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (_) {
+    alert('حصل خطأ أثناء الحجز، حاولي مرة ثانية.');
+  } finally {
+    setSubmitButtonLoading(false);
+  }
 }
 
 fetchCount();
