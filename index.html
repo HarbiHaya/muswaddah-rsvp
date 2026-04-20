@@ -933,7 +933,7 @@ async function doSubmit() {
 
   try {
     await fetch(
-      'https://docs.google.com/forms/d/e/' + CONFIG.FORM_ID + 'Sheet1',
+      'https://docs.google.com/forms/d/e/' + CONFIG.FORM_ID + '/formResponse',
       { method: 'POST', body, mode: 'no-cors' }
     );
   } catch (_) {}
