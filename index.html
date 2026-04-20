@@ -834,10 +834,7 @@ body::after {
 <script>
 const CONFIG = {
   MAX_SEATS   : 20,
-  FORM_ID     : '1FAIpQLSdKWizps3iKBr04L_Kk8w-agCdQaXv8z0lWQnFsqDjGQlvjKg',
-  ENTRY_NAME  : 'entry.457510844',
-  ENTRY_PHONE : 'entry.454338018',
-  APPS_SCRIPT : 'https://script.google.com/macros/s/AKfycbw2rSxrm_OrYDGi6L-c0PFh8NvZheR0r7lgu6Fp49upTYZwPk3oWsCWdbEb2b8laFqLtQ/exec'
+  APPS_SCRIPT : 'https://script.google.com/macros/s/AKfycbyrF4cCSFgBFEDJX0Oh1C-IKMAOKLnP3ZB7QcGQuTAgoZdc3kDEbv11TpxuwfRwLJOGpQ/exec'
 };
 
 let registered = 0;
@@ -927,19 +924,33 @@ async function doSubmit() {
   btn.disabled = true;
   btn.querySelector('span').textContent = '...';
 
-  const body = new FormData();
-  body.append(CONFIG.ENTRY_NAME, fd['f-name'] || '');
-  body.append(CONFIG.ENTRY_PHONE, fd['f-phone'] || '');
-
   try {
-    await fetch(
-      'https://docs.google.com/forms/d/e/' + CONFIG.FORM_ID + '/formResponse',
-      { method: 'POST', body, mode: 'no-cors' }
-    );
-  } catch (_) {}
+    const res = await fetch(CONFIG.APPS_SCRIPT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body: new URLSearchParams({
+        name: fd['f-name'] || '',
+        phone: fd['f-phone'] || ''
+      })
+    });
 
-  await new Promise(r => setTimeout(r, 1200));
-  await fetchCount();
+    const data = await res.json();
+
+    if (data && data.ok) {
+      registered = Math.max(0, Number(data.count) || 0);
+    } else {
+      throw new Error('Submit failed');
+    }
+  } catch (_) {
+    btn.disabled = false;
+    btn.querySelector('span').textContent = 'تأكيد الحجز';
+    alert('صار خطأ أثناء الحجز، حاولي مرة ثانية.');
+    return;
+  }
+
+  updateSeats();
 
   const nameEl = document.getElementById('conf-name');
   if (nameEl) {
